@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>校音器</title>
+
+</head>
+
+<body>
+    <div class="text" style="text-align:center">
+        <br>首先请允许访问麦克风
+        <br>IE系列浏览器不支持此工具
+        <br>经测试ios和android不支持此工具
+        <br>本工具在chrome浏览器上测试通过，如果你使用的是360/猎豹/傲游/QQ等浏览器，请尝试使用极速模式
+        <br>
+        <br>如果还是没有声音，请检查声音设置，看看麦克风是不是本机默认的声音输入设备
+        <br>(以windows为例，右下角小喇叭，右键，录音设备，在此处检查)
+        <br>
+        <br>经个人测试，尤克里里和卡林巴琴可用。
+        <br>
+        <br>频率低时，音分的分辨率较低，想要获得更高的分辨率，可以尝试升高一个八度弹奏来调音
+        <br>
+        <button id="listen">开始监听</button>
+    </div>
+    <div class="text2" style="text-align:center">
+        <br>
+        <br>尤克里里四根弦： G、C、E、A
+        <br>
+        <br>
+    </div>
+    <script>
+        var table = [
+            {},//0
+            { n: 'A0', f: 27.5 },//1
+            { n: 'A♯0/B♭0', f: 29.1352 },//2
+            { n: 'B0', f: 30.8677 },//3
+            { n: 'C1', f: 32.7032 },//4
+            { n: 'C♯1/D♭1', f: 34.6478 },//5
+            { n: 'D1', f: 36.7081 },//6
+            { n: 'D♯1/E♭1', f: 38.8909 },//7
+            { n: 'E1', f: 41.2034 },//8
+            { n: 'F1', f: 43.6535 },//9
+            { n: 'F♯1/G♭1', f: 46.2493 },//10
+            { n: 'G1', f: 48.9994 },//11
+            { n: 'G♯1/A♭1', f: 51.9131 },//12
+            { n: 'A1', f: 55 },//13
+            { n: 'A♯1/B♭1', f: 58.2705 },//14
+            { n: 'B1', f: 61.7354 },//15
+            { n: 'C2', f: 65.4064 },//16
+            { n: 'C♯2/D♭2', f: 69.2957 },//17
+            { n: 'D2', f: 73.4162 },//18
+            { n: 'D♯2/E♭2', f: 77.7817 },//19
+            { n: 'E2', f: 82.4069 },//20
+            { n: 'F2', f: 87.3071 },//21
+            { n: 'F♯2/G♭2', f: 92.4986 },//22
+            { n: 'G2', f: 97.9989 },//23 
+            { n: 'G♯2/A♭2', f: 103.826 },//24
+            { n: 'A2', f: 110 },//25
+            { n: 'A♯2/B♭2', f: 116.541 },//26
+            { n: 'B2', f: 123.471 },//27
+            { n: 'C3', f: 130.813 },//28
+            { n: 'C♯3/D♭3', f: 138.591 },//29
+            { n: 'D3', f: 146.832 },//30
+            { n: 'D♯3/E♭3', f: 155.832 },//31
+            { n: 'E3', f: 164.814 },//32
+            { n: 'F3', f: 174.614 },//33
+            { n: 'F♯3/G♭3', f: 184.997 },//34
+            { n: 'G3', f: 195.998 },//35
+            { n: 'G♯3/A♭3', f: 207.652 },//36
+            { n: 'A3', f: 220 },//37
+            { n: 'A♯3/B♭3', f: 233.082 },//38
+            { n: 'B3', f: 246.942 },//39
+            { n: 'C4', f: 261.626 },//40
+            { n: 'C♯4/D♭4', f: 277.183 },//41
+            { n: 'D4', f: 293.665 },//42
+            { n: 'D♯4/E♭4', f: 311.127 },//43
+            { n: 'E4', f: 329.628 },//44
+            { n: 'F4', f: 349.228 },//45
+            { n: 'F♯4/G♭4', f: 369.994 },//46
+            { n: 'G4', f: 391.995 },//47
+            { n: 'G♯4/A♭4', f: 415.305 },//48
+            { n: 'A4', f: 440 },//49
+            { n: 'A♯4/B♭4', f: 466.164 },//50
+            { n: 'B4', f: 493.883 },//51
+            { n: 'C5', f: 523.251 },//52
+            { n: 'C♯5/D♭5', f: 554.365 },//53
+            { n: 'D5', f: 587.33 },//54
+            { n: 'D♯5/E♭5', f: 622.254 },//55
+            { n: 'E5', f: 659.255 },//56
+            { n: 'F5', f: 698.456 },//57
+            { n: 'F♯5/G♭5', f: 739.989 },//58
+            { n: 'G5', f: 783.991 },//59
+            { n: 'G♯5/A♭5', f: 830.609 },//60
+            { n: 'A5', f: 880 },//61
+            { n: 'A♯5/B♭5', f: 932.328 },//62
+            { n: 'B5', f: 987.767 },//63
+            { n: 'C6', f: 1046.5 },//64
+            { n: 'C♯6/D♭6', f: 1108.73 },//65
+            { n: 'D6', f: 1174.66 },//66
+            { n: 'D♯6/E♭6', f: 1244.51 },//67
+            { n: 'E6', f: 1318.51 },//68
+            { n: 'F6', f: 1396.91 },//69
+            { n: 'F♯6/G♭6', f: 1479.98 },//70
+            { n: 'G6', f: 1567.98 },//71
+            { n: 'G♯6/A♭6', f: 1661.22 },//72
+            { n: 'A6', f: 1760 },//73
+            { n: 'A♯6/B♭6', f: 1864.66 },//74
+            { n: 'B6', f: 1975.53 },//75
+            { n: 'C7', f: 2093 },//76
+            { n: 'C♯7/D♭7', f: 2217.46 },//77
+            { n: 'D7', f: 2349.32 },//78
+            { n: 'D♯7/E♭7', f: 2489.02 },//79
+            { n: 'E7', f: 2637.02 },//80
+            { n: 'F7', f: 2793.83 },//81
+            { n: 'F♯7/G♭7', f: 2959.96 },//82
+            { n: 'G7', f: 3135.96 },//83
+            { n: 'G♯7/A♭7', f: 3322.44 },//84
+            { n: 'A7', f: 3520 },//85
+            { n: 'A♯7/B♭7', f: 3729.31 },//86
+            { n: 'B7', f: 3951.07 },//87
+            { n: 'C8', f: 4186.01 },//88
+        ];
+
+        function main() {
+
+            var context;
+            if (typeof AudioContext !== 'undefined') {
+                context = new AudioContext();
+            } else if (typeof webkitAudioContext !== 'undefined') {
+                context = new webkitAudioContext();
+            } else {
+                alert('Audio context unavailable');
+                // return;
+            }
+
+            var analyser = context.createAnalyser();
+            analyser.smoothingTimeConstant = 0.3;
+            analyser.fftSize = 32768;
+
+            var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+            var el = document.getElementsByClassName('text');
+
+            var maxFrequency = analyser.context.sampleRate / 2;
+            var rangeBegin = Math.round(70 / maxFrequency * analyser.frequencyBinCount);
+            var rangeEnd = Math.round(2000 / maxFrequency * analyser.frequencyBinCount);
+            var levelCutoff = 180;
+
+            var pauseFrameCount = 300;
+            function calcCent(freq) {
+                var n_float = 12 * (Math.log(freq / 27.5) / Math.log(2)) + 1;
+                var n = Math.round(n_float);
+                var name = table[n].n;
+                var targetFreq = table[n].f;
+                var cent = Math.round((n_float - n) * 100);
+                return { 'name': name, 'targetFreq': targetFreq, 'cent': cent };
+            }
+
+
+            function init() {
+                el[0].innerHTML = 'Listening...';
+            }
+
+            var flip = true
+            function update() {
+
+                requestAnimationFrame(update);
+
+                flip = !flip
+
+                // 限制更新频率
+                if (!flip) {
+                    return
+                }
+                var i = null;
+                var freq = null;
+                var info = null;
+                var maxIndex = rangeBegin;
+                var maxLevel = levelCutoff;
+                analyser.getByteFrequencyData(frequencyData);
+                for (i = rangeBegin; i < rangeEnd; i++) {
+                    if (frequencyData[i] > maxLevel) {
+                        var t = frequencyData[i] + frequencyData[i - 1] + frequencyData[i + 1]
+                        if ( // 避免谐波影响
+                            (frequencyData[Math.round(i / 2)] < (t / 3 * 0.4))
+                            && (frequencyData[Math.round(i / 3)] < (t / 3 * 0.4))
+                            && (frequencyData[Math.round(i / 4)] < (t / 3 * 0.4))
+                        ) {
+                            maxLevel = frequencyData[i];
+                            maxIndex = i;
+                        }
+                    }
+                }
+
+                if (frequencyData[maxIndex] > levelCutoff) {
+                    freq = (maxIndex / analyser.frequencyBinCount * maxFrequency).toFixed(1);
+                    info = calcCent(freq);
+                    el[0].innerHTML = freq + '&nbsp;Hz<br>Name:&nbsp;&nbsp;' + info.name + '<br>TargetFreq:&nbsp;&nbsp;' + info.targetFreq + 'Hz<br>Cent:&nbsp;&nbsp;' + info.cent;
+                    pauseFrameCount = 300;
+                } else {
+                    if (pauseFrameCount > 0) {
+                        pauseFrameCount--;
+                        if (pauseFrameCount === 0) {
+                            el[0].innerHTML = 'Listening...';
+                        }
+                    }
+                }
+            }
+
+            navigator.getMedia =
+                navigator.getUserMedia ||
+                navigator.webkitGetUserMedia ||
+                navigator.mozGetUserMedia ||
+                navigator.msGetUserMedia;
+            navigator.getMedia(
+                {
+                    audio: true
+                },
+                function (stream) {
+                    // Mic input -> analyser -> final destination
+                    var input = context.createMediaStreamSource(stream);
+                    input.connect(analyser);
+
+                    // Detaching from final destination for now to avoid feedback
+                    //analyser.connect(context.destination);
+
+                    /* Use this for additional processing if desired
+                    var node = context.createJavaScriptNode(2048, 1, 1);
+                    node.onaudioprocess = function () {
+                    };
+                    analyser.connect(node);
+                    node.connect(context.destination);
+                    */
+                },
+                function () {
+                    console.log(arguments);
+                }
+            );
+            init();
+            update()
+        }
+        document.querySelector('#listen').addEventListener('click', function (e) {
+            console.log(e);
+            e.srcElement.style.display = "none";
+            main()
+        })
+    </script>
+</body>
+
+</html>
